@@ -56,4 +56,43 @@ Interface to the robot's legs. This data is syncronized with the hardware at aro
 - `datas[leg_id].v` : Foot cartesian velocity, in hip frame.
 - `datas[leg_id].tau` : Estimate of motor torque from combination of all controllers. The joint PD control actually runs at 40 kHz on the motor controllers.
 
-hey
+#### Modules that modify `_legController`
+- `commands[leg_id].kpJoint` and `commands[leg_id].kdJoint` written by `RobotRunner::run()`
+- freed by `RobotRunner::~RobotRunner()`
+#### Modules that access `_legController` without modifying
+- `datas[leg_id].q` read by `RobotRunner::run()`
+
+### `_stateEstimate`, `_stateEstimatorContainer`
+The result and interface for the provided state estimator. If you provide the contact state of the robot (which feet are touching the ground), it will determine the robot's position/velocity in the world.
+#### Modules that modify `_stateEstimatorContainer`
+- `RobotRunner`
+  - `init()`, `initializeStateEstimator()`, destructor
+- `CheaterOrientationEstimator`
+  - `run()`
+- `CheaterPositionVelocityEstimator`
+  - `run()`
+ - `VectorNavOrientationEstimator`
+   - `run()`
+ - `LinearKFPositionVelocityEstimator`
+   - `run()`
+ - `ContactEstimator`
+   - `run()`
+ #### Modules that access `_stateEstimatorContainer` without modifying
+ - `LinearKFPositionVelocityEstimator`
+   - `setup()`
+
+### `_driverCommand`
+Inputs from the game pad.
+#### Modules that modify `_driverCommand`
+- `MiniCheetahHardwareBridge`
+  - `run()`
+- `Cheetah3HardwareBridge`
+  - `run()`
+- `HardwareBridge`
+  - `handleGamepadLCM`
+- `GameController`
+  - `updateGameCommand()`
+
+### `_controlParameters`
+Values from the center robot control parameters panel.
+
