@@ -89,10 +89,32 @@ Inputs from the game pad.
 - `Cheetah3HardwareBridge`
   - `run()`
 - `HardwareBridge`
-  - `handleGamepadLCM`
+  - `handleGamepadLCM()`
 - `GameController`
   - `updateGameCommand()`
 
 ### `_controlParameters`
 Values from the center robot control parameters panel.
+#### Modules that modify `_controlParameters`
+- `RobotInterface`
+  - default constructor
+#### Modules that access `_controlParameters` without modifying
+- `RobotInterface`
+  - `startInterface()`
 
+### `_visualizationData`
+Interface to add debugging visualizations to the simulator window.
+#### Modules that modify `_visulizationData`
+- `RobotInterface`
+  - default constructor
+- `Simulation`
+  - default constructor
+#### Modules that access `_visualizationData` without modifying
+- `Graphics3D`
+  - `_AdditionalDrawing()`
+
+### `_robotType`
+Whether you are the mini Cheetah or Cheetah 3 robot.
+#### Modules that modify `_robotType`
+- `RobotInterface`
+  - default constructor
