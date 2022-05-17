@@ -184,6 +184,8 @@ Whether you are the mini Cheetah or Cheetah 3 robot.
   - `run()`
 - `SafetyChecker`
   - `checkForceFeedForward()`
+#### No reads
+
 ### `Vec3<T> commands[leg_id].qDes`
 #### Writes
 - `JPosInitializer`
@@ -200,6 +202,8 @@ Whether you are the mini Cheetah or Cheetah 3 robot.
   - `_Initialization()`, `_SafeCommand()`
 - `FSM_State`
   - `jointPDControl()`
+#### No reads
+
 ### `Vec3<T> commands[leg_id].qdDes`
 #### Writes
 - `JPosInitializer`
@@ -214,6 +218,7 @@ Whether you are the mini Cheetah or Cheetah 3 robot.
   - `_Initialization()`, `_SafeCommand()`
 - `FSM_State`
   - `jointPDControl()`
+#### No reads
 
 ### `Vec3<T> commands[leg_id].pDes`
 #### Writes
@@ -240,6 +245,8 @@ Whether you are the mini Cheetah or Cheetah 3 robot.
   - `LocomotionControlStep()`
 - `FSM_State`
   - `cartesianImpedanceControl()`
+#### No reads
+
 ### `Mat3<T> commands[leg_id].kpCartesian`
 #### Writes
 - `ConvexMPCLocomotion`
@@ -266,6 +273,8 @@ Whether you are the mini Cheetah or Cheetah 3 robot.
   - `run()`
 - `FSM_State`
   - `cartesianImpedanceControl()`
+#### No reads
+
 ### `Mat3<T> commands[leg_id].kpJoint`
 #### Writes
 - `Leg_InvDyn_Controller`
@@ -280,6 +289,8 @@ Whether you are the mini Cheetah or Cheetah 3 robot.
   - `_Initialization()`
 - `FSM_State`
   - `jointPDControl()`
+#### No reads
+
 ### `Mat3<T> commands[leg_id].kdJoint`
 #### Writes
 - `Leg_InvDyn_Controller`
@@ -298,7 +309,9 @@ Whether you are the mini Cheetah or Cheetah 3 robot.
   - `_Initialization()`
 - `FSM_State`
   - `jointPDControl()`
+#### No reads
 ### `Vec3<T> datas[leg_id].q`
+#### No writes
 #### Reads
 - `JPosInitializer`
   - `_UpdateInitial()`
