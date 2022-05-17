@@ -281,6 +281,23 @@ Whether you are the mini Cheetah or Cheetah 3 robot.
 - `FSM_State`
   - `jointPDControl()`
 ### `Mat3<T> commands[leg_id].kdJoint`
+#### Writes
+- `Leg_InvDyn_Controller`
+  - `runController()`
+- `JPos_Controller`
+  - `runController()`
+- `MiniCheetahSpi_Controller`
+  - `runController()`
+- `ConvexMPCLocomotion`
+  - `run()`
+- `VisionMPCLocomotion`
+  - `run()`
+- `FSM_State_BackFlip`
+  - `_Initialization()`
+- `FSM_State_FrontJump`
+  - `_Initialization()`
+- `FSM_State`
+  - `jointPDControl()`
 ### `Vec3<T> datas[leg_id].q`
 ### `Vec3<T> datas[leg_id].qd`
 ### `Vec3<T> datas[leg_id].p`
