@@ -185,13 +185,51 @@ Whether you are the mini Cheetah or Cheetah 3 robot.
 - `SafetyChecker`
   - `checkForceFeedForward()`
 ### `Vec3<T> commands[leg_id].qDes`
+#### Writes
 - `JPosInitializer`
   - `IsInitialized()`
+- `JPos_Controller`
+  - `runController()`
 - `Leg_InvDyn_Controller`
   - `runController()`
-### `Vec3<T> commands[leg_id].qpDes`
+- `MiniCheetahSpi_Controller`
+  - `runController()`
+- `FSM_State_BackFlip`
+  - `_Initialization()`, `_SafeCommand()`
+- `FSM_State_FrontJump`
+  - `_Initialization()`, `_SafeCommand()`
+- `FSM_State`
+  - `jointPDControl()`
 ### `Vec3<T> commands[leg_id].qdDes`
+#### Writes
+- `JPosInitializer`
+  - `IsInitialized()`
+- `JPos_Controller`
+  - `runController()`
+- `Leg_InvDyn_Controller`
+  - `runController()`
+- `FSM_State_BackFlip`
+  - `_Initialization()`, `_SafeCommand()`
+- `FSM_State_FrontJump`
+  - `_Initialization()`, `_SafeCommand()`
+- `FSM_State`
+  - `jointPDControl()`
+
 ### `Vec3<T> commands[leg_id].pDes`
+#### Writes
+- `ConvexMPCLocomotion`
+  - `run()`
+- `VisionMPCLocomotion`
+  - `run()`
+- `FSM_State_StandUp`
+  - `run()`
+- `FSM_State`
+  - `cartesianImpedanceControl()`
+- `SafetyChecker`
+  - `checkPDesFoot()`
+#### Reads
+- `FSM_State_Locomotion`
+  - `LocomotionControlStep()`
 ### `Vec3<T> commands[leg_id].vDes`
 ### `Mat3<T> commands[leg_id].kpCartesian`
 ### `Mat3<T> commands[leg_id].kdCartesian`
