@@ -231,9 +231,55 @@ Whether you are the mini Cheetah or Cheetah 3 robot.
 - `FSM_State_Locomotion`
   - `LocomotionControlStep()`
 ### `Vec3<T> commands[leg_id].vDes`
+#### Writes
+- `ConvexMPCLocomotion`
+  - `run()`
+- `VisionMPCLocomotion`
+  - `run()`
+- `FSM_State_Locomotion`
+  - `LocomotionControlStep()`
+- `FSM_State`
+  - `cartesianImpedanceControl()`
 ### `Mat3<T> commands[leg_id].kpCartesian`
+#### Writes
+- `ConvexMPCLocomotion`
+  - `run()`
+- `VisionMPCLocomotion`
+  - `run()`
+- `FSM_State_StandUp`
+  - `run()`
+- `FSM_State`
+  - `cartesianImpedanceControl()`
+#### Reads
+- `FSM_State_Locomotion`
+  - `LocomotionControlStep()`
+
 ### `Mat3<T> commands[leg_id].kdCartesian`
+#### Writes
+- `ConvexMPCLocomotion`
+  - `run()`
+- `VisionMPCLocomotion`
+  - `run()`
+- `FSM_State_Locomotion`
+  - `LocomotionControlStep()`
+- `FSM_State_StandUp`
+  - `run()`
+- `FSM_State`
+  - `cartesianImpedanceControl()`
 ### `Mat3<T> commands[leg_id].kpJoint`
+#### Writes
+- `Leg_InvDyn_Controller`
+  - `runController()`
+- `JPos_Controller`
+  - `runController()`
+- `MiniCheetahSpi_Controller`
+  - `runController()`
+- `FSM_State_BackFlip`
+  - `_Initialization()`
+- `FSM_State_FrontJump`
+  - `_Initialization()`
+- `FSM_State`
+  - `jointPDControl()`
 ### `Mat3<T> commands[leg_id].kdJoint`
 ### `Vec3<T> datas[leg_id].q`
 ### `Vec3<T> datas[leg_id].qd`
