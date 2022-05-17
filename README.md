@@ -334,6 +334,28 @@ Whether you are the mini Cheetah or Cheetah 3 robot.
 - `FSM_State`
   - `runBalanceController()`
 ### `Vec3<T> datas[leg_id].qd`
+#### No writes
+#### Reads
+- `Leg_InvDyn_Controller`
+  - `runController()`
 ### `Vec3<T> datas[leg_id].p`
+#### No writes
+#### Reads
+- `ConvexMPCLocomotion`
+  - `run()`
+- `VisionMPCLocomotion`
+  - `run()`
+- `FSM_State_Locomotion`
+  - `locomotionSafe()`
+- `FSM_State_StandUp`
+  - `onEnter()`
+- `FSM_State`
+  - `runBalanceController()`
+
 ### `Vec3<T> datas[leg_id].v`
+#### No writes
+#### Reads
+- `FSM_State_Locomotion`
+  - `locomotionSafe()`
 ### `Vec3<T> datas[leg_id].tauEstimate`
+#### No accesses from controllers
