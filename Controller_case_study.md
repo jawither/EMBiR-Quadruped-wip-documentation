@@ -1,6 +1,7 @@
 # Controller case study: `JPos_Controller`
 To better help understand the codebase and the implementation of an inherited `RobotController`, this guide will walk through the implementation and execution of `JPos_Controller`, a basic provided controller for joint position control on the MuadQuad.
 
+### Contents
 1. [Code entry and initialization](#code-entry-and-initialization)
 2. [`RobotRunner`](#robotrunner)
 
@@ -72,6 +73,6 @@ void PeriodicTask::loopFunction() {
 ...
 }
 ```
-Any module that inherits from `PeriodicTask` should implement `PeriodicTask::init()` and `PeriodicTask::run()` and be executed in the same way.
+Any module that inherits from `PeriodicTask` should implement the pure virtual functions `PeriodicTask::init()` and `PeriodicTask::run()` and be executed in the same way.
 
 # `RobotRunner`
