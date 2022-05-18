@@ -76,3 +76,6 @@ void PeriodicTask::loopFunction() {
 Any module that inherits from `PeriodicTask` should implement the pure virtual functions `PeriodicTask::init()` and `PeriodicTask::run()` and be executed in the same way.
 
 # `RobotRunner`
+As mentioned, `RobotRunner::init()` and `RobotRunner::run()` are implementations of pure virtual functions from `PeriodicTask`, and are called by `PeriodicTask` code.
+
+### `void RobotRunner::init()`
