@@ -1,6 +1,7 @@
 # MuadQuad controller documentation
 - [`RobotController` members and their accesses](#robotcontroller-members-and-their-accesses)
-- [`RobotController` member accesses from within controllers](#robotcontroller-member-accesses-from-within-controllers)
+- [`RobotController` member accesses from within provided controllers](#robotcontroller-member-accesses-from-within-provided-controllers)
+
 To add your own robot controller, you should add a folder under `Cheetah-Software/user`, and add the folder to the `CMakeLists.txt` in `user`. Your `.cpp` and `.hpp` files are the actual controller, which should extend `RobotController`.
 ## `RobotController` members and their accesses
 ### `Quadruped<float>* _quadruped`
@@ -128,7 +129,7 @@ Whether you are the mini Cheetah or Cheetah 3 robot.
 - `RobotInterface`
   - default constructor
 
-## `RobotController` member accesses from within controllers
+## `RobotController` member accesses from within provided controllers
 If you are interested in the design of the provided controllers in `user`, or are struggling to get them working, you can consult their memory accesses here.
 
 ### `Quadruped<float>* _quadruped`
