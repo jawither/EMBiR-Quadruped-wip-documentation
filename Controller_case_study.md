@@ -76,6 +76,11 @@ void PeriodicTask::loopFunction() {
 ...
 }
 ```
+> :warning: **If you are using mobile browser**: Be very careful here!
+
+| WARNING: be careful to baz the quux before initializing the retro encabulator! |
+| --- |
+
 Any module that inherits from `PeriodicTask` should implement the pure virtual functions `PeriodicTask::init()` and `PeriodicTask::run()` and be executed in the same way.
 
 ### `void RobotRunner::init()`
