@@ -429,7 +429,26 @@ If you are interested in the design of the provided controllers in `user`, or ar
 #### Not accessed by provided controllers
 
 ### `RobotControlParameters* _controlParameters`
+TODO
 
 ### `VisualizationData* _visualizationData`
+#### Writes
+- `ConvexMPCLocomotion`
+  - `run()`
+#### No reads
 
 ### `RobotType _robotType`
+#### No writes
+#### Reads
+- `ConvexMPCLocomotion`
+  - `_SetupCommand()`
+- `FSM_State_BackFlip`
+  - `onEnter()`
+- `FSM_State_FrontJump`
+  - default constructor
+- `FSM_State_Locomotion`
+  - default constructor
+- `FSM_State_StandUp`
+  - `run()`
+- `SafetyChecker`
+  - `checkForceFeedForward()`
