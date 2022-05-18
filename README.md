@@ -125,6 +125,8 @@ Whether you are the mini Cheetah or Cheetah 3 robot.
   - default constructor
 
 ## `RobotController` member accesses from within controllers
+If you are interested in the design of the provided controllers in `user`, or are struggling to get them working, you can consult their memory accesses here.
+
 ### `Quadruped<float>* _quadruped`
 #### No writes
 #### Reads
