@@ -1,5 +1,5 @@
-# Controller case study
-To better help understand the codebase and the implementation of an inherited `RobotController`, this guide will walk through the implementation and execution of `JPos_Controller`, a simple provided controller for joint position control on the MuadQuad.
+# Controller case study: `JPos_Controller`
+To better help understand the codebase and the implementation of an inherited `RobotController`, this guide will walk through the implementation and execution of `JPos_Controller`, a basic provided controller for joint position control on the MuadQuad.
 
 1. [Code entry and initialization](#code-entry-and-initialization)
 2. [`RobotRunner`](#robotrunner)
