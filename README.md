@@ -67,7 +67,9 @@ The result and interface for the provided state estimator. If you provide the co
 
 Accesses to the state estimator are particularly confusing because of the onion-like layering of the data structure and the different it’s accessed by different modules. “Reads” of `_stateEstimatorContainer` occur through an access of `_stateEstimate`, which usually happens through a call to `StateEstimatorContainer::getResult()`. An exception to this is in `GenericEstimator` and other inherited estimators, which have a `_stateEstimatorData` member, which itself points to the same memory as `_stateEstimatorContainer::_data.result` and `_stateEstimatorContainer::getResult()`. Thus accesses to the state estimator from within the estimators themselves look a bit different than access from, say, `RobotRunner` or the MIT controllers.
 
-The only direct modifications to the state estimator made by controllers should be calls to `StateEstimatorContainer::setContactPhase()`. `RobotRunner::initializeStateEstimator()` will also modify it by adding the relevant estimators to the container. Other than these exceptions, all writes to the state estimator should come from the periodic calls to the actual estimators’ `run()` functions.
+Usually, the only direct modifications to the state estimator made by controllers are calls to `StateEstimatorContainer::setContactPhase()`. The one exception to this pattern is `FSM_State_Vision::_updateStateEstimator()`, which directly modifies the state estimator via pointer access from `StateEstimatorContainer::getResultHandle()`. `RobotRunner::initializeStateEstimator()` will also modify the state estimator by adding the relevant estimators to the container.
+
+Other than these exceptions, all writes to the state estimator should come from the periodic calls to the actual estimators’ `run()` functions.
 
 #### Modules that modify `_stateEstimatorContainer`
 - `RobotRunner`
@@ -368,6 +370,18 @@ If you are interested in the design of the provided controllers in `user`, or ar
 #### No accesses from controllers
 
 ### `StateEstimate<float>* _stateEstimate`, `StateEstimatorContainer<float>* _stateEstimatorContainer`
+
+#### Writes (via setContactPhase())
+- `ConvexMPCLocomotion`
+  - `run()`
+- `VisionMPCLocomotion`
+  - `run()`
+- `FSM_State_BalanceStand`
+  - `run()`
+- `FSM_State_RecoveryStand`
+  - `_StandUp()`
+- `FSM_State_Vision`
+  - `_updateStateEstimator()`
 
 #### Reads (via `StateEstimatorContainer::getResult()`)
 - `ConvexMPCLocomotion`
