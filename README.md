@@ -424,3 +424,12 @@ If you are interested in the design of the provided controllers in `user`, or ar
   - `runBalanceController()`
 - `SafetyChecker`
   - `checkSafeOrientation()`
+
+### `GamepadCommand* _driverCommand`
+#### Not accessed by provided controllers
+
+### `RobotControlParameters* _controlParameters`
+
+### `VisualizationData* _visualizationData`
+
+### `RobotType _robotType`
