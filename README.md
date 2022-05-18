@@ -1,4 +1,6 @@
 # MuadQuad controller documentation
+- [`RobotController` members and their accesses](#robotcontroller-members-and-their-accesses)
+- [`RobotController` member accesses from within controllers](#robotcontroller-member-accesses-from-within-controllers)
 To add your own robot controller, you should add a folder under `Cheetah-Software/user`, and add the folder to the `CMakeLists.txt` in `user`. Your `.cpp` and `.hpp` files are the actual controller, which should extend `RobotController`.
 ## `RobotController` members and their accesses
 ### `Quadruped<float>* _quadruped`
@@ -69,7 +71,7 @@ Accesses to the state estimator are particularly confusing because of the onion-
 
 Usually, the only direct modifications to the state estimator made by controllers are calls to `StateEstimatorContainer::setContactPhase()`. The one exception to this pattern is `FSM_State_Vision::_updateStateEstimator()`, which directly modifies the state estimator via pointer access from `StateEstimatorContainer::getResultHandle()`. `RobotRunner::initializeStateEstimator()` will also modify the state estimator by adding the relevant estimators to the container.
 
-Other than these exceptions, all writes to the state estimator should come from the periodic calls to the actual estimators’ `run()` functions.
+Other than these exceptions, all writes to the state estimator should come from the periodic calls to the actual estimators’ `run()` functions. [See more about controller memory accesses](#robotcontroller-member-accesses-from-within-controllers)
 
 #### Modules that modify `_stateEstimatorContainer`
 - `RobotRunner`
