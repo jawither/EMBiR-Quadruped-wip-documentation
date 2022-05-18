@@ -1,9 +1,29 @@
 # MuadQuad controller documentation
 - [`RobotController` members and their accesses](#robotcontroller-members-and-their-accesses)
+  - [`Quadruped<float>* _quadruped`](#quadrupedfloat-_quadruped)
+  - [`FloatingBaseModel<float>* _model`](#floatingbasemodelfloat-_model)
+  - [`LegController<float>* _legController`](#legcontrollerfloat-_legcontroller)
+  - [`StateEstimate<float>* _stateEstimate` & `StateEstimatorContainer<float>* _stateEstimatorContainer`](#stateestimatefloat-_stateestimate-stateestimatorcontainerfloat-_stateestimatorcontainer)
+  - [`GamepadCommand* _driverCommand`](#gamepadcommand-_drivercommand)
+  - [`RobotControlParameters* _controlParameters`](#robotcontrolparameters-_controlparameters)
+  - [`VisualizationData* _visualizationData`](#visualizationdata-_visualizationdata)
+  - [`RobotType _robotType`](#robottype-_robottype)
 - [`RobotController` member accesses from within provided controllers](#robotcontroller-member-accesses-from-within-provided-controllers)
+  - [`Quadruped<float>* _quadruped`](#quadrupedfloat-_quadruped-1)
+  - [`FloatingBaseModel<float>* _model`](#floatingbasemodelfloat-_model-1)
+  - [`LegController<float>* _legController`](#legcontrollerfloat-_legcontroller-1)
+  - [`StateEstimate<float>* _stateEstimate` & `StateEstimatorContainer<float>* _stateEstimatorContainer`](#stateestimatefloat-_stateestimate-stateestimatorcontainerfloat-_stateestimatorcontainer-1)
+  - [`GamepadCommand* _driverCommand`](#gamepadcommand-_drivercommand-1)
+  - [`RobotControlParameters* _controlParameters`](#robotcontrolparameters-_controlparameters-1)
+  - [`VisualizationData* _visualizationData`](#visualizationdata-_visualizationdata-1)
+  - [`RobotType _robotType`](#robottype-_robottype-1)
+
+
+## `RobotController` members and their accesses
+If you would like to implement your own controller, here is a list of inherited `RobotController` class members and how they are accessed by the codebase.
 
 To add your own robot controller, you should add a folder under `Cheetah-Software/user`, and add the folder to the `CMakeLists.txt` in `user`. Your `.cpp` and `.hpp` files are the actual controller, which should extend `RobotController`.
-## `RobotController` members and their accesses
+
 ### `Quadruped<float>* _quadruped`
 Contains constant parameters about the robot (link lengths, gear ratios, inertias...). The `getHipLocation` function returns the location of the "hip" in the body coordinate system. The x-axis points forward, y-axis to the left, and z-axis up. 
 #### Modules that modify `_quadruped`
@@ -70,9 +90,9 @@ The result and interface for the provided state estimator. If you provide the co
 
 Accesses to the state estimator are particularly confusing because of the onion-like layering of the data structure and the different it’s accessed by different modules. “Reads” of `_stateEstimatorContainer` occur through an access of `_stateEstimate`, which usually happens through a call to `StateEstimatorContainer::getResult()`. An exception to this is in `GenericEstimator` and other inherited estimators, which have a `_stateEstimatorData` member, which itself points to the same memory as `_stateEstimatorContainer::_data.result` and `_stateEstimatorContainer::getResult()`. Thus accesses to the state estimator from within the estimators themselves look a bit different than access from, say, `RobotRunner` or the MIT controllers.
 
-Usually, the only direct modifications to the state estimator made by controllers are calls to `StateEstimatorContainer::setContactPhase()`. The one exception to this pattern is `FSM_State_Vision::_updateStateEstimator()`, which directly modifies the state estimator via pointer access from `StateEstimatorContainer::getResultHandle()`. `RobotRunner::initializeStateEstimator()` will also modify the state estimator by adding the relevant estimators to the container.
+Usually, direct modifications to the state estimator made by controllers are calls to `StateEstimatorContainer::setContactPhase()`. One exception to this pattern is `FSM_State_Vision::_updateStateEstimator()`, which directly modifies the state estimator via pointer access from `StateEstimatorContainer::getResultHandle()`. `RobotRunner::initializeStateEstimator()` will also modify the state estimator by adding the relevant estimators to the container.
 
-Other than these exceptions, all writes to the state estimator should come from the periodic calls to the actual estimators’ `run()` functions. [See more about controller memory accesses](#robotcontroller-member-accesses-from-within-controllers)
+Other than these exceptions, all writes to the state estimator should come from the periodic calls to the actual estimators’ `run()` functions. [See more about controller memory accesses here.](#robotcontroller-member-accesses-from-within-provided-controllers)
 
 #### Modules that modify `_stateEstimatorContainer`
 - `RobotRunner`
@@ -373,6 +393,7 @@ If you are interested in the design of the provided controllers in `user`, or ar
 #### No accesses from controllers
 
 ### `StateEstimate<float>* _stateEstimate`, `StateEstimatorContainer<float>* _stateEstimatorContainer`
+[Read more about the state estimator here.](#stateestimatefloat-_stateestimate-stateestimatorcontainerfloat-_stateestimatorcontainer)
 
 #### Writes (via setContactPhase())
 - `ConvexMPCLocomotion`
