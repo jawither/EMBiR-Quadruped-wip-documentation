@@ -65,7 +65,7 @@ Interface to the robot's legs. This data is syncronized with the hardware at aro
 ### `StateEstimate<float>* _stateEstimate`, `StateEstimatorContainer<float>* _stateEstimatorContainer`
 The result and interface for the provided state estimator. If you provide the contact state of the robot (which feet are touching the ground), it will determine the robot's position/velocity in the world.
 
-Accesses to the state estimator are particularly confusing because of the onion-like layering of the data structure and the different it’s accessed by different modules. “Reads” of `_stateEstimatorContainer` occur through an access of `_stateEstimate`, which usually happens through a call to `StateEstimatorContainer::getResult()`. An exception to this is in `GenericEstimator` and other inherited estimators, which have a `_stateEstimatorData` member, which itself points to the same memory as `_stateEstimatorContainer::_data.result` and `_stateEstimatorContainer::getResult`. Thus accesses to the state estimator from within the estimators themselves look a bit different than access from, say, `RobotRunner` or the MIT controllers.
+Accesses to the state estimator are particularly confusing because of the onion-like layering of the data structure and the different it’s accessed by different modules. “Reads” of `_stateEstimatorContainer` occur through an access of `_stateEstimate`, which usually happens through a call to `StateEstimatorContainer::getResult()`. An exception to this is in `GenericEstimator` and other inherited estimators, which have a `_stateEstimatorData` member, which itself points to the same memory as `_stateEstimatorContainer::_data.result` and `_stateEstimatorContainer::getResult()`. Thus accesses to the state estimator from within the estimators themselves look a bit different than access from, say, `RobotRunner` or the MIT controllers.
 
 The only direct modifications to the state estimator made by controllers should be calls to `StateEstimatorContainer::setContactPhase()`. `RobotRunner::initializeStateEstimator()` will also modify it by adding the relevant estimators to the container. Other than these exceptions, all writes to the state estimator should come from the periodic calls to the actual estimators’ `run()` functions.
 
@@ -366,3 +366,23 @@ If you are interested in the design of the provided controllers in `user`, or ar
   - `locomotionSafe()`
 ### `Vec3<T> datas[leg_id].tauEstimate`
 #### No accesses from controllers
+
+### `StateEstimate<float>* _stateEstimate`, `StateEstimatorContainer<float>* _stateEstimatorContainer`
+
+#### Reads (via `StateEstimatorContainer::getResult()`)
+- `ConvexMPCLocomotion`
+  - `_SetupCommand()`, `updateMPCIfNeeded()`, `solveDenseMPC()`, `solveSparseMPC()`
+- `VisionMPCLocomotion`
+  - `updateMPCIfNeeded()`, `solveDenseMPC()`
+- `FSM_State_BalanceStand`
+  - `onEnter()`
+- `FSM_State_Locomotion`
+  - `locomotionSafe()`
+- `FSM_State_RecoveryStand`
+  - `onEnter()`, `_UpsideDown()`
+- `FSM_State_Vision`
+  - `onEnter()`, `_UpdateObstacle()`, `_Visualization()`, `_UpdateVelCommand()`
+- `FSM_State`
+  - `runBalanceController()`
+- `SafetyChecker`
+  - `checkSafeOrientation()`
