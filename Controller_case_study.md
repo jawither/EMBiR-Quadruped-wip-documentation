@@ -1,8 +1,11 @@
 # Controller case study
 To better help understand the codebase and the implementation of an inherited `RobotController`, this guide will walk through the implementation and execution of `JPos_Controller`, a simple provided controller for joint position control on the MuadQuad.
 
-## Code entry and initialization
-#### `int main(int argc, char** argv)`
+1. [Code entry and initialization](#code-entry-and-initialization)
+2. [`RobotRunner`](#robotrunner)
+
+# Code entry and initialization
+### `int main(int argc, char** argv)`
 The `main` function of any controller will pass command line arguments and a newly allocated instance of the desired controller type to `main_helper()`.
 ```cpp
 int main(int argc, char** argv) {
@@ -11,7 +14,7 @@ int main(int argc, char** argv) {
 }
 ```
 
-#### `int main_helper(int argc, char** argv, RobotController* ctrl)`
+### `int main_helper(int argc, char** argv, RobotController* ctrl)`
 `main_helper` will parse the command line arguments, which are as follows:
 - `argc[1]`: the type of Robot
   - `e` for MuadQuad
@@ -31,7 +34,7 @@ else if (gMasterConfig._robot == RobotType::MUADQUAD) {
       hw.run();
 }
 ```
-#### `void MuadQuadHardwareBridge::run()`
+### `void MuadQuadHardwareBridge::run()`
 This function mainly serves to initialize a dynamically allocated instance of `RobotRunner`.
 ```cpp
 _robotRunner =
@@ -48,9 +51,11 @@ _robotRunner->robServCommand = &_robServCommand;
 _robotRunner->start();
 ```
 
-As a low-level aside, here is how `RobotRunner::run()` is actually called:
+As a low-level aside, here is how `RobotRunner::init()` and `RobotRunner::run()` are called:
 ```cpp
 void PeriodicTask::start() {
+  ...
+  init(); // pure virtual, calls RobotRunner::init()
   ...
   _thread = std::thread(&PeriodicTask::loopFunction, this);
 }
@@ -67,3 +72,6 @@ void PeriodicTask::loopFunction() {
 ...
 }
 ```
+Any module that inherits from `PeriodicTask` should implement `PeriodicTask::init()` and `PeriodicTask::run()` and be executed in the same way.
+
+# `RobotRunner`
