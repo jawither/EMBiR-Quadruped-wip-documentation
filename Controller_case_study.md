@@ -39,15 +39,10 @@ _robotRunner =
 _robotRunner->LCMCommand = &_LCMCommand;
 _robotRunner->robServData = &_robServData;
 _robotRunner->robServCommand = &_robServCommand;
-_robotRunner->driverCommand = &_gamepadCommand;
-_robotRunner->robotType = RobotType::MUADQUAD;
-_robotRunner->controlParameters = &_robotParams;
-_robotRunner->vectorNavData = &_vectorNavData;
-_robotRunner->visualizationData = &_visualizationData;
-_robotRunner->cheetahMainVisualization = &_mainCheetahVisualization;
+...
 ```
 
-`RobotRunner` inherits from `PeriodicTask`, which means its `run` function will be executed in a looping thread. It is here in `MuadQuadHardwareBridge::run()` that this thread is started.
+`RobotRunner` inherits from `PeriodicTask`, which means its `run` function will be executed in a looping thread. This looping `run` is the core of the controller execution, and it is here in `MuadQuadHardwareBridge::run()` that this thread is started.
 
 ```cpp
 _robotRunner->start();
