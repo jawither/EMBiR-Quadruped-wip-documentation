@@ -3,7 +3,7 @@ To better help understand the codebase and the implementation of an inherited `R
 
 ### Contents
 1. [Code entry and initialization](#code-entry-and-initialization)
-2. [`RobotRunner`](#robotrunner)
+2. [`RobotRunner` and `PeriodicTask`](#robotrunner-and-periodictask)
 
 # Code entry and initialization
 ### `int main(int argc, char** argv)`
@@ -46,13 +46,17 @@ _robotRunner->robServCommand = &_robServCommand;
 ...
 ```
 
-`RobotRunner` inherits from `PeriodicTask`, which means its `run` function will be executed in a looping thread. This looping `run` is the core of the controller execution, and it is here in `MuadQuadHardwareBridge::run()` that this thread is started.
+```cpp
+_robotRunner->start();
+```
+
+# `RobotRunner` and `PeriodicTask`
+`RobotRunner` inherits from `PeriodicTask`, allowing its `run` function to be executed in a looping thread. This looping `run` is the core of the controller execution. Here is how `RobotRunner::init()` and `RobotRunner::run()` are called from `MuadQuadHardwareBridge::run()`:
 
 ```cpp
 _robotRunner->start();
 ```
 
-As a low-level aside, here is how `RobotRunner::init()` and `RobotRunner::run()` are called:
 ```cpp
 void PeriodicTask::start() {
   ...
@@ -61,7 +65,6 @@ void PeriodicTask::start() {
   _thread = std::thread(&PeriodicTask::loopFunction, this);
 }
 ```
-
 
 ```cpp
 void PeriodicTask::loopFunction() {
@@ -74,8 +77,5 @@ void PeriodicTask::loopFunction() {
 }
 ```
 Any module that inherits from `PeriodicTask` should implement the pure virtual functions `PeriodicTask::init()` and `PeriodicTask::run()` and be executed in the same way.
-
-# `RobotRunner`
-As mentioned, `RobotRunner::init()` and `RobotRunner::run()` are implementations of pure virtual functions from `PeriodicTask`, and are called by `PeriodicTask` code.
 
 ### `void RobotRunner::init()`
