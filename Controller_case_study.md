@@ -47,3 +47,23 @@ _robotRunner->robServCommand = &_robServCommand;
 ```cpp
 _robotRunner->start();
 ```
+
+As a low-level aside, here is how `RobotRunner::run()` is actually called:
+```cpp
+void PeriodicTask::start() {
+  ...
+  _thread = std::thread(&PeriodicTask::loopFunction, this);
+}
+```
+
+
+```cpp
+void PeriodicTask::loopFunction() {
+...
+  while (_running) {
+    ...
+    run(); // pure virtual, calls RobotRunner::run()
+    ...
+...
+}
+```
