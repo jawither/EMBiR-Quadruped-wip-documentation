@@ -129,9 +129,7 @@ To prevent the effects of race conditions, the leg controller is disabled for th
     _legController->setEnabled(true);
   ...
 ```
-From the 50th iteration onwards, core behavior of the function is enabled.
-
-First, emergency stop is checked.
+From the 50th iteration onwards, core behavior of the function is enabled. First, emergency stop is checked.
 ```cpp
     ...
     if( (rc_control.mode == RC_mode::OFF) && controlParameters->use_rc ) {
@@ -163,12 +161,11 @@ Next, the leg controller is initialized.
       }
       ...
 ```
-Finally, the controller and visualizer are executed.
+Finally, the controller is executed.
 ```cpp
       ...
       else {
         _robot_ctrl->runController();
-        cheetahMainVisualization->p = _stateEstimate.position;
         ...
   finalizeStep();
 }
