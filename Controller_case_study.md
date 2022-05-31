@@ -24,9 +24,9 @@ int main(int argc, char** argv) {
 - `argc[3]`(optional): whether parameters are loaded from file
   - `f` for load from file, if no argument, parameters will be loaded from network
 
-Once `main_helper` has parsed the arguments, it will initialize either a `SimulationBridge` or a `HardwareBridge` and call `run()`.
+Once `main_helper` has parsed the arguments, depending on whether you are running the robot simulation or the actual robot, it will initialize either a `SimulationBridge` or a `HardwareBridge` and call `run()`.
 
-In this guide, we will assume we are running the controller on the MuadQuad, on the actual robot (not the simulation).
+In this guide, we will assume we are running the controller on the MuadQuad, on the actual robot.
 
 ```cpp
 ...
