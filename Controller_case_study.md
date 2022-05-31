@@ -1,5 +1,5 @@
 # Controller case study: `JPos_Controller`
-To better help understand the codebase and the implementation of an inherited `RobotController`, this guide will walk through the implementation and execution of `JPos_Controller`, a basic provided controller for joint position control on the MuadQuad.
+To better help understand the codebase and the implementation of an inherited `RobotController`, this mid-level guide will walk through the implementation and execution of `JPos_Controller`, a basic provided controller for joint position control on the MuadQuad.
 
 ### Contents
 1. [Code entry and initialization](#code-entry-and-initialization)
@@ -80,3 +80,25 @@ void PeriodicTask::loopFunction() {
 Any module that inherits from `PeriodicTask` should implement the pure virtual functions `PeriodicTask::init()` and `PeriodicTask::run()` and be executed in the same way.
 
 ### `void RobotRunner::init()`
+`RobotRunner::init()` sets up LCM subscriptions and initializes the controller and its members.
+
+```cpp
+_responseLCM.subscribe("robot_server_response", &RobotRunner::handleresponseLCM, this);
+...
+_responselcmthread = std::thread(&RobotRunner::handlelcm, this);
+```
+
+```
+_robot_ctrl->_model = &_model;
+_robot_ctrl->_quadruped = &_quadruped;
+_robot_ctrl->_legController = _legController;
+_robot_ctrl->_stateEstimator = _stateEstimator;
+_robot_ctrl->_stateEstimate = &_stateEstimate;
+_robot_ctrl->_visualizationData= visualizationData;
+_robot_ctrl->_robotType = robotType;
+_robot_ctrl->_driverCommand = driverCommand;
+_robot_ctrl->_controlParameters = controlParameters;
+_robot_ctrl->_desiredStateCommand = _desiredStateCommand;
+
+_robot_ctrl->initializeController();
+  ```
