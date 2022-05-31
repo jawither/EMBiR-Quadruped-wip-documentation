@@ -4,6 +4,7 @@ To better help understand the codebase and the implementation of an inherited `R
 ### Contents
 1. [Code entry and initialization](#code-entry-and-initialization)
 2. [`RobotRunner` and `PeriodicTask`](#robotrunner-and-periodictask)
+3. [`JPos_Controller`](#jpos_controller)
 
 # Code entry and initialization
 ### `int main(int argc, char** argv)`
@@ -116,9 +117,6 @@ void RobotRunner::run() {
 
 To prevent the effects of race conditions, the leg controller is disabled for the first 50 iterations.
 
-> **Warning**
-> TODO? simplify these if statements?
-
 ```cpp
   ...
   if (count_ini < 10) {
@@ -176,8 +174,11 @@ Finally, the controller and visualizer are executed.
 }
 ```
 
+> **Warning**
+> setupStep() and finalizeStep() might not be worth going over. they may be too low-level for the purpose of this guide, maybe will remove them.
+
 ### `void RobotRunner::setupStep()`
-This function is run every iteration **before** the user code in `RobotController::run()` is executed. Mainly, it sets up the leg controller for the next iteration.
+This function is run every iteration **before** the user code in `RobotController::run()` is executed. Mainly, it sets up the leg controller for the next iteration. It also handles some simulator-only behavior for the state estimator.
 
 ```cpp
 void RobotRunner::setupStep() {
@@ -190,8 +191,69 @@ void RobotRunner::setupStep() {
   _legController->zeroCommand();
   _legController->setEnabled(true);
   _legController->setMaxTorqueCheetah3(208.5);
-  ...
+
+  // state estimator checks (for simulator only)
+  if (!_cheaterModeEnabled && controlParameters->cheater_mode) {
+    printf("[RobotRunner] Transitioning to Cheater Mode...\n");
+    initializeStateEstimator(true);
+    _cheaterModeEnabled = true;
+  }
+  if (_cheaterModeEnabled && !controlParameters->cheater_mode) {
+    printf("[RobotRunner] Transitioning from Cheater Mode...\n");
+    initializeStateEstimator(false);
+    _cheaterModeEnabled = false;
+  }
+
   get_rc_control_settings(&rc_control);
 }
 ```
 
+### `void RobotRunner::finalizeStep()`
+Conversely, this function is run every iteration **after** user code in `RobotController::run()` runs. It sends leg commands to the robot server, updates the state estimator, and publishes debug data via LCM.
+
+> **Warning**
+> TODO difference between leg_control_data and leg_control_command?
+
+```cpp
+void RobotRunner::finalizeStep() {
+  ...
+  else if (robotType == RobotType::MUADQUAD) {
+    _legController->updateCommand(robServCommand);
+
+    robot_server_command_lcmt LCMCommandfix;
+
+    for(int leg = 0; leg < 4; leg++) {
+      for(int axis = 0; axis < 3; axis++) {
+        int idx = leg*3 + axis;
+        int mq_idx = muadquad_leg_reordering[idx];
+        int sign = 1;
+        if (leg%2 == 0)
+          sign = -1;
+        LCMCommandfix.tau_ff[mq_idx] = sign*robServCommand->tau_ff[idx];
+        LCMCommandfix.q_des[mq_idx]  = sign*(robServCommand->q_des[idx] - muadquad_angle_offsets[idx]);
+        LCMCommandfix.qd_des[mq_idx] = sign*robServCommand->qd_des[idx];
+        LCMCommandfix.kp_joint[mq_idx] = robServCommand->kp_joint[idx];
+        LCMCommandfix.kd_joint[mq_idx] = robServCommand->kd_joint[idx];
+      }
+    }
+
+    _lcm.publish("robot_server_command", &LCMCommandfix);
+    
+  } else {
+    assert(false);
+  }
+  _legController->setLcm(&leg_control_data_lcm, &leg_control_command_lcm);
+  _stateEstimate.setLcm(state_estimator_lcm);
+  _lcm.publish("leg_control_command", &leg_control_command_lcm);
+  _lcm.publish("leg_control_data", &leg_control_data_lcm);
+  _lcm.publish("state_estimator", &state_estimator_lcm);
+  _iterations++;
+}
+```
+> **Note**
+> **Everything up until this point is universal behavior of the support code and will be the same for all controllers. Beyond this point is documentation specifically for the `JPos_Controller` controller.**
+
+# `JPos_Controller`
+Recall that `JPos_Controller` and all other controllers inherit from `RobotController` and implement its pure virtual functions `initializeController()`, `runController()` and `updateVisualization()`. `JPos_Controller` is a basic controller that only implements `RobotController::runController()`.
+
+### `JPos_Controller::runController()`
