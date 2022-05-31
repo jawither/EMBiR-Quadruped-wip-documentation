@@ -254,6 +254,37 @@ void RobotRunner::finalizeStep() {
 > **Everything up until this point is universal behavior of the support code and will be the same for all controllers. Beyond this point is documentation specifically for the `JPos_Controller` controller.**
 
 # `JPos_Controller`
-Recall that `JPos_Controller` and all other controllers inherit from `RobotController` and implement its pure virtual functions `initializeController()`, `runController()` and `updateVisualization()`. `JPos_Controller` is a basic controller that only implements `RobotController::runController()`.
+`JPos_Controller` sends simple angle data to the joints in a sine wave motion. It takes no input from the gamepad.
 
-### `JPos_Controller::runController()`
+Recall that `JPos_Controller` and all other controllers inherit from `RobotController` and implement its pure virtual functions. `JPos_Controller` is a basic controller that only implements `RobotController::runController()`, but more involved controllers may also implement `RobotController::initializeController()` and `RobotController::updateVisualization()`.
+
+### `void JPos_Controller::runController()`
+First, we calculate actuator gains from `userParameters`.
+```cpp
+void JPos_Controller::runController(){
+  Mat3<float> kpMat;
+  Mat3<float> kdMat;
+  kpMat << userParameters.kp, 0, 0, 0, userParameters.kp, 0, 0, 0, userParameters.kp;
+  kdMat << userParameters.kd, 0, 0, 0, userParameters.kd, 0, 0, 0, userParameters.kd;
+  ...
+```
+For the first 10 iterations, copy the joint angles into `_jpos_ini`.
+> **Warning**
+> what does this do? what is `_jpos_ini` used for?
+
+```cpp
+  ...
+  static int iter(0);
+  ++iter;
+
+  if(iter < 10){
+    for(int leg(0); leg<4; ++leg){
+      for(int jidx(0); jidx<3; ++jidx){
+        _jpos_ini[3*leg+jidx] = _legController->datas[leg].q[jidx];
+      }
+    }
+  }
+  ...
+```
+
+
