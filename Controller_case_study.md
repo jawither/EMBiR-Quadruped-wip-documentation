@@ -83,17 +83,83 @@ Any module that inherits from `PeriodicTask` should implement the pure virtual f
 `RobotRunner::init()` subscribes to the robot server response LCM channel and initializes the controller and its members.
 
 ```cpp
-_responseLCM.subscribe("robot_server_response", &RobotRunner::handleresponseLCM, this);
-...
-_responselcmthread = std::thread(&RobotRunner::handlelcm, this);
+  _responseLCM.subscribe("robot_server_response", &RobotRunner::handleresponseLCM, this);
+  ...
+  _responselcmthread = std::thread(&RobotRunner::handlelcm, this);
 ```
 
 ```
-_robot_ctrl->_model = &_model;
-_robot_ctrl->_quadruped = &_quadruped;
-_robot_ctrl->_legController = _legController;
-_robot_ctrl->_stateEstimator = _stateEstimator;
-...
-_robot_ctrl->initializeController();
+  _robot_ctrl->_model = &_model;
+  _robot_ctrl->_quadruped = &_quadruped;
+  _robot_ctrl->_legController = _legController;
+  _robot_ctrl->_stateEstimator = _stateEstimator;
+  ...
+  _robot_ctrl->initializeController();
 ```
+
 ### `void RobotRunner::run()`
+`RobotRunner::run()` dispatches the core function calls for the execution of the robot. Recall that `RobotRunner` inherits from `PeriodicTask`, so `RobotRunner::run()` is executed periodically.
+
+On every iteration, `run()` will step the state estimator and clear the previous iteration's visualization data. The iteration count is tracked by `count_ini`.
+
+```cpp
+void RobotRunner::run() {
+  _stateEstimator->run();
+  visualizationData->clear();
+  setupStep();
+
+  static int count_ini(0);
+  ++count_ini;
+  ...
+}
+```
+
+To prevent the effects of race conditions, the leg controller is disabled for the first 50 iterations.
+
+> **Warning**
+> TODO? simplify these if statements?
+
+```cpp
+  ...
+  if (count_ini < 10) {
+    _legController->setEnabled(false);
+  } else if (20 < count_ini && count_ini < 30) {
+    _legController->setEnabled(false);
+  } else if (40 < count_ini && count_ini < 50) {
+    _legController->setEnabled(false);
+  } else {
+    _legController->setEnabled(true);
+  ...
+```
+From the 50th iteration onwards, core behavior of the function is enabled.
+
+First, emergency stop is checked.
+```cpp
+    ...
+    if( (rc_control.mode == RC_mode::OFF) && controlParameters->use_rc ) {
+      for (int leg = 0; leg < 4; leg++) {
+        _legController->commands[leg].zero();
+      }
+      _robot_ctrl->Estop();
+    }
+    ...
+```
+Next, the leg controller is initialized.
+
+```cpp
+      if (!_jpos_initializer->IsInitialized(_legController)) {
+        Mat3<float> kpMat;
+        Mat3<float> kdMat;
+        ...
+        else if (robotType == RobotType::MUADQUAD){
+          //Need to redefine these for MUADQUAD
+          kpMat << 5, 0, 0, 0, 5, 0, 0, 0, 5;
+          kdMat << 0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1;
+        }
+        ...
+        for (int leg = 0; leg < 4; leg++) {
+          _legController->commands[leg].kpJoint = kpMat;
+          _legController->commands[leg].kdJoint = kdMat;
+        }
+      }
+```
