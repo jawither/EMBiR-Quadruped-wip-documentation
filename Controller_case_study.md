@@ -80,7 +80,7 @@ void PeriodicTask::loopFunction() {
 Any module that inherits from `PeriodicTask` should implement the pure virtual functions `PeriodicTask::init()` and `PeriodicTask::run()` and be executed in the same way.
 
 ### `void RobotRunner::init()`
-`RobotRunner::init()` sets up LCM subscriptions and initializes the controller and its members.
+`RobotRunner::init()` subscribes to the robot server response LCM channel and initializes the controller and its members.
 
 ```cpp
 _responseLCM.subscribe("robot_server_response", &RobotRunner::handleresponseLCM, this);
