@@ -171,10 +171,27 @@ Finally, the controller and visualizer are executed.
       else {
         _robot_ctrl->runController();
         cheetahMainVisualization->p = _stateEstimate.position;
-        
-        _robot_ctrl->updateVisualization();
-        cheetahMainVisualization->p = _stateEstimate.position;
-      }
-   }
+        ...
+  finalizeStep();
 }
 ```
+
+### `void RobotRunner::setupStep()`
+This function is run every iteration **before** the user code in `RobotController::run()` is executed. Mainly, it sets up the leg controller for the next iteration.
+
+```cpp
+void RobotRunner::setupStep() {
+  ...
+  else if (robotType == RobotType::MUADQUAD) {
+    _legController->updateData(robServData);
+  }
+
+  // Setup the leg controller for a new iteration
+  _legController->zeroCommand();
+  _legController->setEnabled(true);
+  _legController->setMaxTorqueCheetah3(208.5);
+  ...
+  get_rc_control_settings(&rc_control);
+}
+```
+
