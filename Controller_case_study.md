@@ -147,6 +147,7 @@ First, emergency stop is checked.
 Next, the leg controller is initialized.
 
 ```cpp
+      ...
       if (!_jpos_initializer->IsInitialized(_legController)) {
         Mat3<float> kpMat;
         Mat3<float> kdMat;
@@ -162,4 +163,18 @@ Next, the leg controller is initialized.
           _legController->commands[leg].kdJoint = kdMat;
         }
       }
+      ...
+```
+Finally, the controller and visualizer are executed.
+```cpp
+      ...
+      else {
+        _robot_ctrl->runController();
+        cheetahMainVisualization->p = _stateEstimate.position;
+        
+        _robot_ctrl->updateVisualization();
+        cheetahMainVisualization->p = _stateEstimate.position;
+      }
+   }
+}
 ```
