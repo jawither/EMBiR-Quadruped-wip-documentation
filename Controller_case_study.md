@@ -287,4 +287,38 @@ For the first 10 iterations, copy the joint angles into `_jpos_ini`.
   ...
 ```
 
+Here's some stuff. It's necessary for reasons!
+> **Warning** what does this do
+```cpp
+  ...
+  _legController->_maxTorque = 150;
+  _legController->_legsEnabled = true;
+
+  if(userParameters.calibrate > 0.4) {
+    _legController->_calibrateEncoders = userParameters.calibrate;
+  } else {
+    if(userParameters.zero > 0.5) {
+      _legController->_zeroEncoders = true;
+    } else {
+      _legController->_zeroEncoders = false;
+```
+
+Finally, the actual joint position control. A sine wave position float `pos` is calculated from `iter` and a constant multiplier of 0.001. These nested loops iterate through the 12 actuators and assign each joint's `qDes` (desired angle) to be `pos` with a `qdDes` (desired angular velocity) of 0. `tauFeedForward` (torque) is taken from `userParameters`. Finally, the leg controller gains are updated.
+
+```cpp
+      for(int leg(0); leg<4; ++leg){
+        for(int jidx(0); jidx<3; ++jidx){
+          float pos = std::sin(.001f * iter);
+          _legController->commands[leg].qDes[jidx] = pos;
+          _legController->commands[leg].qdDes[jidx] = 0.;
+          _legController->commands[leg].tauFeedForward[jidx] = userParameters.tau_ff;
+        }
+        _legController->commands[leg].kpJoint = kpMat;
+        _legController->commands[leg].kdJoint = kdMat;
+      }
+    }
+  }
+}
+```
+
 
