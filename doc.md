@@ -1,5 +1,7 @@
 # The OS at a glance
 
+<img src="images/simple.png" width="550">
+
 The above diagram shows a simplified control flow diagram of the MuadQuad’s OS (featuring the MIT Controller, but is generalizable to any typical controller). The core of the robot’s operation is a feedback loop (shown in red) between the robot’s state estimator and leg controller.
 
 Most controllers will take two inputs: the current state estimation of the robot, and gamepad inputs from the user. Using an algorithm, controllers will determine the necessary leg commands needed to achieve the behavior asked by the user (for example, to locomote forward), given that current state estimation.
