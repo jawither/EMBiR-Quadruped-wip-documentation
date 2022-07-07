@@ -128,3 +128,37 @@ These are the most common type of gait. They are represented by a cycle length i
 The second kind of gait is a mixed-frequency gait, which allows each leg to have its own period independent from the other legs. TODO explain further
 
 
+# Robot server
+The robot server acts as an interface between the mid-level hardware commands passed to the leg controller and the low-level hardware of the actual robot. Because of the close relationship between it and the microcontroller firmware, the robot server runs on its own pi that is separate from the controller pi to allow greater flexibility of the controller and its hardware.
+
+The robot server receives leg controller commands from the control pi via LCM and parses them into a byte stream that is usable by the pi3hat’s microcontrollers. These microcontrollers then dispatch the necessary low-level commands to the moteus drivers, which finally move the motors. As a last step, the moteus drivers send a response back with information about the state of the motors which is used by the robot server to do data logging. This data is sent back to the control pi via LCM.
+
+# Vestigial code
+The following pieces of code are present in the repository but are not used.
+
+## Vestigial for MuadQuad
+- FSM States: BackFlip, FrontJump, ImpedanceControl, JointPD, RecoveryStand, Vision
+  - The MuadQuad only uses Passive, StandUp, BalanceStand, and Locomotion
+- `VisionMPC`
+  - Only used in the Vision state
+
+## Truly vestigial
+- `BalanceController`
+  - `runBalanceController()` is called from `FSM_State::runControls()`, but `runControls()` is never called anywhere
+- `GaitScheduler`
+  - Only accessed by the balance controller
+- `ContactEstimator`
+  - An empty `.cpp`
+- `SolverMPC`
+  - Included indirectly by `ConvexMPCLocomotion` but not used
+- `convexMPC_util`
+  - Not included anywhere
+- `OsqpTriples`
+  - Not included anywhere other than a test file
+- `GraphSearch`, `FootstepPlanner`, `FootstepCost`
+  - Included by `ConvexMPCLocomotion` but not used
+- `filters.cpp`
+  - Not included anywhere other than a test file
+- `save_file.cpp`
+  - Not included anywhere other than a test file
+
