@@ -11,6 +11,8 @@ In the case of the MIT Controller, the algorithm is a combination of Whole Body 
 When running the MuadQuad in the lab, we run 4 separate terminals (shown by bolded arrows): the controller/support code, the robot server, the gamepad handler, and the control panel.
 
 
+<img src="images/full.png" width="1000">
+
 # Support code
 Code that is not part of the actual robot controller is referred to as support code. The support code acts as a framework for implementing controllers by providing functionality for state estimation, leg control, and a floating-base model of the robot that user controllers can use in their implementations.
 
