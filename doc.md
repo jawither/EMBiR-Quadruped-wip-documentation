@@ -61,3 +61,70 @@ To summarize:
 In the robot’s entire control stack, there are three types of parameters: generic `ControlParameters`, `RobotControlParameters`, and `SimulatorControlParameters`. The `ControlParameters` are often called user parameters in the code, and are used as inputs for the user controller. The contents of the `ControlParameters` will vary with the controller used. The `RobotControlParameters` describe attributes specific to the robot’s hardware, such as sensor noise. The `SimulatorControlParameters` describe parameters specific to the execution of the simulation, like simulation speed.
 
 All three types of parameters are loaded from `.yaml` files. When the control program is run from the command line, one of the arguments is whether the parameters are loaded from a file. If this argument is set, the `HardwareBridge` will initialize the `ControlParameters` and the `RobotControlParameters` from the file specified in `MuadQuadHardwareBridge::run()`. If this argument is not set, the parameters will instead be loaded from a `.yaml` by the `SimControlPanel` and sent via LCM. The `SimulatorControlParameters` are always loaded from a file by the `SimControlPanel`.
+
+
+# The MIT Controller
+The support code allows for execution of user controllers through inheritance of the `RobotController` class. Any class that inherits from `RobotController` will be integrated into the system by calls to `RobotController::initializeController()` and `RobotController::runController()`. The MIT controller is an example of such a controller. The controller was originally written by MIT for their MiniCheetah quadruped and has been adapted for the MuadQuad.
+
+## `MIT_Controller::initializeController()` & `MIT_Controller::runController()`
+As is the case with any controller, `initializeController()` will be called once upon startup, and `runController()` will be called every iteration. For the MIT controller, initialization allocates a `ControlFSM` object. `runController()` 1) updates the `DesiredStateCommand`, and 2) runs the `ControlFSM`.
+
+## The MIT FSM
+The core of the MIT Controller is a finite state machine that expresses the current state of the robot’s behavior. Each state in the FSM is itself a class object inherited from `FSM_State`. When the `ControlFSM` object is created by `MIT_Controller::initializeController()`, its constructor will create all of the state objects. For the purpose of the MuadQuad, the four states used are `FSM_State_Passive`, `FSM_State_StandUp`, `FSM_State_BalanceStand`, and `FSM_State_Locomotion`.
+
+`ControlFSM` is responsible for interacting with the `GamepadCommand` object to determine which control mode to activate, and thus to which state the FSM needs to transition. Each state inherits from the `FSM_State` parent class and implements its virtual member functions. At a high level, each iteration, `ControlFSM` will check the state of the gamepad to see if the human user has requested a change in state, and if so, call the appropriate state member functions to execute the transition. If no change in state is requested by the user, `ControlFSM` will execute the normal behavior of that state for the iteration.
+
+`ControlFSM` also performs safety checks at various points in the control flow of the controller, specifically that the desired positions of the feet and the desired feedforward forces are all safe.
+
+## FSM State functions
+The `FSM_State` parent class offers several virtual functions that `Control_FSM` uses to polymorphically interact with the different states. Each state class should implement these functions.
+
+### `FSM_State::checkTransition()`
+After `Control_FSM` determines the user requested a change in state from the gamepad, it will call the current state’s`checkTransition()` function. This function will determine whether the current state is able to transition into the requested state, as well as how long the transition will take. In the case of a successful transition, `checkTransition()` returns the name of the new state after transitioning. If the transition is unsuccessful, it returns the name of the current state.
+
+For example, you cannot transition from BalanceStand into StandUp (you’re already standing), so `FSM_State_BalanceStand::checkTransition()` will not verify the transition if the requested state is StandUp.
+
+### `FSM_State::transition()`
+This function is called after `checkTransition()` successfully verifies the transition. It handles any actions necessary to perform the actual transition itself. What this means specifically varies based on the transition. For most transitions, this function does nothing. 
+
+_For transitioning from BalanceStand to Locomotion, the function will request the BalanceStand algorithm runs for extra iterations before finishing the transition. (Really, it requests the alg be run for 1000*transition_duration more iterations, but the transition_duration is 0… so i dont see the reason for adding that bit of logic to the code… (¬‿¬) )
+
+### `FSM_State::onExit()`
+Once `transition()` verifies the transition has completed, `Control_FSM` will call the current state’s `onExit()` function. This allows the state to clean up any necessary data before it completely exits. For most states, this function does nothing.
+
+After `onExit()` returns, it is at this point that `Control_FSM` updates its `currentState` member variable to be enumerated type associated with the new state.
+
+### `FSM_State::onEnter()`
+The last step in the state transition is calling the new state’s `onEnter()` function. The main purpose of `onEnter()` is to zero out any data associated with the state, including data about the previous transition (which is now complete). Also, many states have dynamically allocated data that needs to be reinitialized when the state is entered.
+
+In the case of a state transition, all of the `FSM_State` functions listed up until this point are each called once, consecutively, in the same iteration. After, `onEnter()` executes, however, the iteration finishes, and any further calls (namely to `run()`, or if another transition is triggered) will take place on the next iteration.
+
+### `FSM_State::run()`
+If `Control_FSM` determines that no transition is taking place on the current iteration, it will call the current state’s `run()` function, which triggers the default behavior of the robot when it is in that state.
+
+Here, the differences between states are most visible, as each state’s implementation of the `run()` function varies significantly. `FSM_State_Passive::run()`, for example, does nothing, which reflects the lifeless nature of the robot when it’s in the passive state. Most other states’ `run()` functions will call a uninherited class-specific “step” function that handles the low-level details of the robot behavior in that state.
+
+## WBC
+Whole body control, or WBC, describes a feedback optimization technique that tracks multiple motion trajectories and solves conflicts using priorities in robots possibly under multiple contacts (L Sentis, 2021).
+
+ [this is where i need help describing what exactly WBC is, how it works, and how much detail i should go into]. 
+
+Any state that uses WBC (in the case of MuadQuad, every state except Passive) will allocate a `LocomotionCtrl` object, which inherits from the `WBC_Ctrl` class, and use it to call `WBC_Ctrl::run()` each iteration from within `FSM_State::run()`. From within this object, WBC will calculate optimized mid-level hardware commands and send them to the leg controller.
+
+## `ConvexMPCLocomotion`
+The most interesting FSM state in the MIT controller is `FSM_State_Locomotion`. In addition to using WBC, which runs every iteration, Locomotion also uses an implementation of model-predictive-control that simplifies the control into a convex optimization problem. CMPCL runs at a lower frequency, roughly 20-30hz. 
+
+It’s from within CMPCL that we define the different gaits for the robot. CMPCL will predict the GRFs required to enact the selected gait and, like WBC, send commands to the leg controller.
+
+ [like wbc i will need a bit of guidance with what to say here exactly]. 
+
+## Gaits
+All robot gaits are performed within the Locomotion state. Gaits are listed in `ConvexMPCLocomotion.h` and initialized by the CMPCL constructor. There are two types of gaits, `OffsetDurationGait` and `MixedFrequencyGait`.
+
+### `OffsetDurationGait`
+These are the most common type of gait. They are represented by a cycle length in timesteps and two four-dimensional vectors of integers. Each dimension of the vectors corresponds to one leg of the robot. The first vector represents the number of timesteps into each cycle that the legs make contact. The second vector represents the duration of each leg’s contact. Each leg can only have one contact per cycle.
+
+### `MixedFrequencyGait`
+The second kind of gait is a mixed-frequency gait, which allows each leg to have its own period independent from the other legs. TODO explain further
+
+
